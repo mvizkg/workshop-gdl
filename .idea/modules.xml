@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/workshop/communication-adapter/communication-adapter.iml" filepath="$PROJECT_DIR$/workshop/communication-adapter/communication-adapter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/workshop/credit-bureau/credit-bureau.iml" filepath="$PROJECT_DIR$/workshop/credit-bureau/credit-bureau.iml" />
+      <module fileurl="file://$PROJECT_DIR$/workshop/credit-manager/credit-manager.iml" filepath="$PROJECT_DIR$/workshop/credit-manager/credit-manager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/workshop/workshop.iml" filepath="$PROJECT_DIR$/workshop/workshop.iml" />
+    </modules>
+  </component>
+</project>
+

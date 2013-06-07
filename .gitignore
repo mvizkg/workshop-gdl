@@ -1,0 +1,29 @@
+# Minimal .gitignore file to work with Java and Scala languages
+# and the Intellij IDEA IDE.
+# 
+# Author: thegeekinside <thegeek@thegeekinside.net>
+#
+# Ignore all targets
+
+target
+**/*.class
+credit-bureau
+
+# Ignore IntelliJ Stuff
+.idea/workspace.xml
+
+# Ignore Miscellaneous stuff
+*.log
+**/*.log
+changes.txt
+reminders.txt
+
+# Mac OSX temporal files
+*.DS_Store
+
+# Ignore Python stuff
+*.swp
+
+# Ignore CMake stuff
+**/CMakeFiles
+
