@@ -13,35 +13,42 @@
 
 #define PORT 3550 /* El puerto que será abierto */
 #define BACKLOG 2 /* El número de conexiones permitidas */
+#define DEFAULT_BUFFER_SIZE 256 /* Tamanio del buffer por default */
 
 void doprocessing (int sock)
 {
-    int n;
-    char buffer[256];
+    char buffer[DEFAULT_BUFFER_SIZE];
 
-    memset(&(buffer), '0', 256);
+    memset(&(buffer), '0', DEFAULT_BUFFER_SIZE);
     int recvMsgSize;
+    int accumulated = 0; /* Contador de los bytes recuperados de la conexion */
     
-    /* Receive message from client */
-    if ((recvMsgSize = recv(sock, buffer, 256, 0)) < 0)
-        perror("ERROR reading to socket");
-
     /* Send received string and receive again until end of transmission */
-    while (recvMsgSize > 0)      /* zero indicates end of transmission */
-    {
-        /* Echo message back to client */
-        if (send(sock, buffer, recvMsgSize, 0) != recvMsgSize)
-            perror("ERROR writing to socket");
+    
+    do {
+        if ( accumulated == DEFAULT_BUFFER_SIZE) 
+        {
+            // TODO: Procesar el mensaje
+            // TODO: Generar respuesta del mensaje, es importante terminar el mensaje con 0x03
+            //       para que el cliente sepa en donde termina.            
+            send(sock, b ,sizeof(b),0); // En este caso como se está regresando el mismo mensaje ya trae ese caracter.
+        }
 
         /* See if there is more data to receive */
-        if ((recvMsgSize = recv(sock, buffer, 256, 0)) < 0)
+        if ((recvMsgSize = recv(sock, buffer, DEFAULT_BUFFER_SIZE, 0)) < 0){
             perror("ERROR reading to socket");
-    }
+        }
+        
+        accumulated += recvMsgSize; 
+            
+    } while (recvMsgSize > 0);      /* zero indicates end of transmission */
 
+    printf(buffer);
+    printf("pase por aca");
     closesocket(sock);    /* Close client socket */
 }
 
-BOOL initW32() 
+BOOL init_winsock2() 
 {
 		WSADATA wsaData;
 		WORD version;
@@ -71,7 +78,7 @@ BOOL initW32()
 int main()
 {
 
-	 initW32(); /* Necesaria para compilar en Windows */ 
+   init_winsock2(); /* Necesaria para compilar en Windows */ 
 	 	
    int fd, fd2; /* los descriptores de archivos */
 
@@ -98,7 +105,6 @@ int main()
    server.sin_addr.s_addr = INADDR_ANY;
    /* INADDR_ANY coloca nuestra dirección IP automáticamente */
 
-   //bzero(&(server.sin_zero),8);
    memset(&(server.sin_zero), '0', 8);
    /* escribimos ceros en el reto de la estructura */
 
@@ -109,7 +115,7 @@ int main()
       exit(-1);
    }
 
-   if(listen(fd,BACKLOG) == -1) {  /* llamada a listen() */
+   if(listen(fd, BACKLOG) == -1) {  /* llamada a listen() */
       printf("error en listen()\n");
       exit(-1);
    }
@@ -124,12 +130,8 @@ int main()
 
       printf("Se obtuvo una conexión desde %s\n", inet_ntoa(client.sin_addr) );
       /* que mostrará la IP del cliente */
-
-      send(fd2,"Bienvenido a mi servidor.\n",22,0);
-      /* que enviará el mensaje de bienvenida al cliente */
       
       doprocessing(fd2);
 
    } /* end while */
 }
-
