@@ -17,14 +17,51 @@
 
 // Prototipos
 void process_messages (int sock);
+void process_find_loans(char *buffer, char *message_response);
+int find_loans(char *loans, char *rfc);
 
-char *rtrim(char *s) {
-    char* back = s + (strlen(s)-2);
-    while (isspace(*--back));
-    *(back+1) = '\0';
-    return s;
+/**
+ * Elimina los espacios al principio y al final de
+ * una cadena de texto.
+ */
+void trim(char *str)
+{
+    int i;
+    int begin = 0;
+    int end = strlen(str) - 5;
+
+    while (isspace(str[begin]))
+        begin++;
+
+    while (isspace(str[end]) && (end >= begin))
+        end--;
+
+    // Shift all characters back to the start of the string array.
+    for (i = begin; i <= end; i++)
+        str[i - begin] = str[i];
+
+    str[i - begin] = '\0'; // Null terminate string.
 }
 
+/**
+ * Devuelve una subcadena de una longitud especificada por
+ * el parametro a partir de la posicion.
+ */
+char* substr(const char *str, int pos, int len) {
+    if(len == 0) {
+        len = strlen(str) - pos;
+        printf("%s %d\n", str, len);
+    }
+    char *substr = malloc(len + 1);
+       
+    strncpy(substr, str + pos, len);
+    *(substr+len) = '\0';
+    return substr;
+}
+
+/**
+ * Inicia el servidor.
+ */
 void start_server() {
     init_winsock2(); /* Necesaria para compilar en Windows */
 
@@ -77,6 +114,9 @@ void start_server() {
     } /* end while */
 }
 
+/**
+ * Procesa los mensajes provenientes del Communication Adapter.
+ */
 void process_messages (int sock) {
     char buffer[DEFAULT_BUFFER_SIZE];
 
@@ -93,16 +133,39 @@ void process_messages (int sock) {
         }
 
         if (recvMsgSize > 0) {
-            // TODO: Determinar el tipo de mensaje antes de procesarlo.
-            char loans[2048];
-            find_loans(loans, rtrim(buffer));
-            send(sock, loans ,sizeof(loans), 0); // En este caso como se está regresando el mismo mensaje ya trae ese caracter.
+            // TODO: Implementar el manejo de los mensajes faltantes y cuando llega un mensaje desconocido.
+            /* Procesando consulta */
+            trim(buffer);
+            char* req_msg_type = substr(buffer, 0, 4); // Se obtiene el tipo de mensaje que viene en los primeros 4 caracteres.
+            printf("Procesando mensaje de tipo: %s**\n", req_msg_type);
+
+            char message_response[2048];            
+            
+            /* Process find loans */
+            if(strcmp(req_msg_type,"RELM") == 0) { 
+                strcpy(message_response, "RPLM");  // Agrega la cabecera del mensaje de respuesta
+                process_find_loans(buffer, message_response);
+            }
+            
+            message_response[strlen(message_response)] = 0x03; // End of Text character
+            send(sock, message_response ,sizeof(message_response), 0); // 
         }
     } while (recvMsgSize > 0);     /* zero indicates end of transmission */
 
     closesocket(sock);    /* Close client socket */
 }
 
+/**
+ * Funcion especifica para procesar el mensaje de consulta.
+ */
+void process_find_loans(char *buffer, char *message_response) {
+    char *rfc = substr(buffer, 4, 10);
+    find_loans(message_response, rfc);
+}
+
+/**
+ * Inicializa los sockets.
+ */
 BOOL init_winsock2() {
     WSADATA wsaData;
     WORD version;
@@ -127,9 +190,10 @@ BOOL init_winsock2() {
     }
 }
 
+/**
+ * Punto de entrada principal.
+ */
 int main() {
-    char loans[2048];
-    //find_loans(loans, "23456ABCDE");
     start_server();
 }
 
@@ -140,25 +204,32 @@ int main() {
 #define FIELD_SEPARATOR "|"
 #define RFC_FIELD_COLUMN 2
 
+/**
+ * Busca entre los registros los prestamos dados a un cliente
+ * especifico y los devuelve en una cadena de texto.
+ */
 int find_loans(char *loans, char *rfc) {
-    printf("%s*-*",rfc);
+    printf("loans: %s, rfc: %s", loans, rfc);
     FILE * fp;
     char line[LOAN_RECORD_SIZE];
     char *field;
     int field_counter;
     int loan_counter;
-    loans[0] = '\0';
-
+    
     fp = fopen("Loans.txt", "r");
     if (fp == NULL)
         return -1;
     fgets(line, LOAN_RECORD_SIZE, fp); // Skip the header
+    
+    // Se recorre el archivo linea a linea    
     while (fgets(line, LOAN_RECORD_SIZE, fp) != NULL) {
-        //printf("%s*\n", line);
         char original_line[LOAN_RECORD_SIZE];
+    
         strcpy(original_line, line);
         field = strtok(line, FIELD_SEPARATOR);
         field_counter++;
+    
+        // Se recorren los campos separados por el token |
         while (field != NULL) {
             field = strtok (NULL, FIELD_SEPARATOR);
             field_counter++;
@@ -170,12 +241,11 @@ int find_loans(char *loans, char *rfc) {
             }
         }
 
-        field_counter = 0;
+        field_counter = 0;  // Se resetea el contador de campos
     }
 
     fclose(fp);
     strcat(loans, "#\0");  // Null to delimit the string and char to indicate the end of loan
-    loans[strlen(loans)] = 0x03; // End of Text character
     return 0;
 }
 
