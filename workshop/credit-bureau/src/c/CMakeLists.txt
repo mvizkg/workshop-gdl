@@ -9,3 +9,5 @@ set (Tutorial_VERSION_MINOR 0)
 
 add_executable (credit-bureau cb.c)
 target_link_libraries(credit-bureau ws2_32)
+
+gcc cb.c -lws2_32
