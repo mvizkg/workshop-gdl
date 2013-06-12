@@ -17,7 +17,7 @@
 
 void selectionMethod( int sock, char *rfc, char i )
 {
-    switch( i ) 
+	switch( i ) 
 	{
 		case 's':
 			searchRFC( sock, rfc );
