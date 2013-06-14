@@ -17,11 +17,14 @@
 
 void selectionMethod( int sock, char *rfc, char i )
 {
+	printf("\nOption:%c", i);
 	switch( i ) 
 	{
 		case 's':
 			searchRFC( sock, rfc );
+			break;
 		case 'c' :
+			cancelLoan( sock, rfc  );
 			break;
 		case 'a' :
 			break;
@@ -32,7 +35,6 @@ void searchRFC( int sock, char *rfc )
 {
 	int n, x;
 	x = strlen(rfc);
-	
 	printf( "\nRFC:%s", rfc );
 	printf( "\nLength: %d", x );
 	
@@ -45,10 +47,8 @@ void searchRFC( int sock, char *rfc )
 
 	while( fgets( line, 100, f ) != NULL )
 	{
-		p = line + 4;
-		
+		p = line + 4;		
 		strncpy( word, p, 10 );
-		//printf( "\nword:%s", word );
 		
 		if( strncmp( word, rfc, 10 ) == 0 )
 		{
@@ -69,6 +69,51 @@ void searchRFC( int sock, char *rfc )
 	}
 	p = '\0';
 	fclose( f );
+}
+
+void cancelLoan( int sock, char *rfc )
+{
+	int n, x;
+	x = strlen(rfc);
+	printf( "\nRFC:%s", rfc );
+	printf( "\nLength: %d", x );
+	
+	FILE *f;
+	
+	if( ( f = fopen("Loans.txt", "r") ) == NULL )
+	{
+		printf( "Trouble opening file\n" );
+	}
+	else
+	{
+		char line[100];
+		char word[x];
+		char *p;
+		bool found = false;
+
+		while( fgets( line, 100, f ) != NULL )
+		{
+			p = line + 4;		
+			strncpy( word, p, 10 );
+		
+			if( strncmp( word, rfc, 10 ) == 0 )
+			{
+				send( sock, line, strlen(line), 0 );
+				char *s;
+				s = strrchr( line, 'Y');
+				printf ("\nFound %s", s);
+				//printf("\nLine:%sLength:%d", line, strlen(line) );
+				found = true;
+			}
+		}
+		if( found == false )
+		{
+			send( sock, rfc, x, 0 );
+			send( sock, "\t>>\tNot Found!", 17, 0 );
+			printf("\n%s Not Found.", rfc);
+		}
+		fclose( f );
+	}
 }
 
 void doprocessing( int sock )
