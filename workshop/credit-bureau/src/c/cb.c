@@ -53,14 +53,14 @@ void searchRFC( int sock, char *rfc )
 		if( strncmp( word, rfc, 10 ) == 0 )
 		{
 			send( sock, line, strlen(line), 0 );
-			printf("\nLine:%sLength:%d", line, strlen(line) );
+			printf( "\nLine:%s", line );
 			found = true;
 		}
     }
 	if( found == false )
 	{
 		send( sock, rfc, x, 0 );
-		send( sock, "\t>>  Not Found!", 17, 0 );
+		send( sock, "\t>>\tNot Found!", 17, 0 );
 		printf("\n%s Not Found.", rfc);
 	}
 	for( n = 0; n < 10; n ++)
@@ -99,11 +99,23 @@ void cancelLoan( int sock, char *rfc )
 			if( strncmp( word, rfc, 10 ) == 0 )
 			{
 				send( sock, line, strlen(line), 0 );
-				char *s;
-				s = strrchr( line, 'Y');
-				printf ("\nFound %s", s);
-				//printf("\nLine:%sLength:%d", line, strlen(line) );
+				printf( "\nLine:%s", line );
 				found = true;
+				
+				char *str;
+				str = strrchr( line, 'Y');
+				printf ("\nFound %s", str);
+				
+				char *id;
+				id = strstr( str, "|" ) + 1;
+				int i = 0;
+				printf("ID:%s", id);
+				
+			/*	while( str[i]!='\0' )
+				{
+					i++;
+				}
+			*/
 			}
 		}
 		if( found == false )
@@ -129,9 +141,7 @@ void doprocessing( int sock )
 	for( x = 0; x < recvMsgSize -1; x++)
 	{
 		rfc[x] = buffer[x+1];
-		//buffer[x] = '0';
 	}
-	//buffer[recvMsgSize -1] = '0';
 	
     /* Receive message from client */
     /* if( ( recvMsgSize = recv(sock, buffer, 256, 0) ) < 0 )
@@ -242,10 +252,9 @@ int main()
       printf("Se obtuvo una conexion desde %s\n", inet_ntoa( client.sin_addr ) );
       /* que mostrará la IP del cliente */
 
-      send( fd2, "Hola, bienvenido Miguel Angel\n", 32, 0 );
+      //send( fd2, "Hola, bienvenido Miguel Angel\n", 32, 0 );
       /* que enviará el mensaje de bienvenida al cliente */
       
       doprocessing(fd2);
-
    } /* end while */
 }

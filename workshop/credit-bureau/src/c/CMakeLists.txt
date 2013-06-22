@@ -11,3 +11,6 @@ add_executable (credit-bureau cb.c)
 target_link_libraries(credit-bureau ws2_32)
 
 gcc cb.c -lws2_32
+
+http://localhost:8080/RESTServer/rest/loan/MAVG123456
+34567ZXCVB
