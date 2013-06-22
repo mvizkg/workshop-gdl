@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC 
+    "//Apache Software Fundation//DTD Struts Configuration 2.0//EN" 
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+   <package name="com.recluit.lab" extends="struts-default">
+    <action name= "index">
+		<result>/index.jsp</result>
+    </action>
+    <action name="loan" class="com.recluit.lab.action.LoanAction">
+        <result name="search">/search.jsp</result>
+        <result name="close">/close.jsp</result>
+        <result name="add">/add.jsp</result>
+        <result name="payment">/payment.jsp</result>
+         <result name="not_found">/not_found.jsp</result>
+    </action>
+	<action name="add_loan" class="com.recluit.lab.action.LoanAction">
+		<result name="reject">/reject.jsp</result>
+        <result name="establish">/establish.jsp</result>
+    </action>
+    <action name="close_loan" class="com.recluit.lab.action.LoanAction">
+		<result name="closed">/closed.jsp</result>
+    </action>
+   	</package>
+</struts>
